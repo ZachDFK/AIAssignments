@@ -19,8 +19,8 @@ class TransportPuzzle(puzzle.Puzzle):
         self.init_ai(aitype)
         
     def init_ai(self,aitype):
-        if aitype == 0:
-            self.ai = Ai()
+        self.ai = ai.AI(self,aitype)
+        self.listofmoves = []
     def init_state(self):
         self.level = 0
         self.selectedmoves = []
@@ -32,10 +32,11 @@ class TransportPuzzle(puzzle.Puzzle):
         self.state_tree = puzzle.StateTree(copy.deepcopy(self.state))
         self.update_state_tree(self.state_tree.baseroot)
             
-    def update_state_tree(self,root):
+    def update_state_tree(self,root,ai = 0):
         for state in self.possible_states:
             self.state_tree.add_node(puzzle.StateTreeNode(state),root)
-        print(self.state_tree)    
+        if ai == 0:
+            print(self.state_tree)    
     
     def get_moves(self,order):
         moves =[]
@@ -52,7 +53,7 @@ class TransportPuzzle(puzzle.Puzzle):
                 while len(adv2arr) >0:
                     moves.append( adv1 + "-" + adv2arr.pop(0).get_name())
         return moves
-    def get_all_current_possible_states(self,level):
+    def get_all_current_possible_states(self,level,ai=0):
         order = level%2
         current_puzz = copy.deepcopy(self)
         
@@ -63,7 +64,8 @@ class TransportPuzzle(puzzle.Puzzle):
             self.make_a_move(move,1)
             possible_states.append(self.state)
         self = copy.deepcopy(current_puzz)
-        print("Current state:" + str(self.state))
+        if ai == 0:
+            print("Current state:" + str(self.state))
         
         return possible_states
     def generate_start_adventurers(self,numb):
@@ -94,7 +96,17 @@ class TransportPuzzle(puzzle.Puzzle):
             print("Illegal Move")
         self.make_a_move(move)
         self.selectedmoves.clear()
+    
+    def ai_move(self,step):
+        if self.listofmoves == []:
+            self.listofmoves = self.ai.real_ai.find_list_of_moves()
+        while len(self.listofmoves) >0:
+            self.make_a_move(self.logofmoves.pop(0))
+            if(step == 1):
+                break
         
+        
+    
     def gen_numb_any_start(self,numb):
         adventurers = []
         
@@ -158,8 +170,10 @@ class TransportPuzzle(puzzle.Puzzle):
             retstr += adv.get_name() + ","
         retstr += "]"
         return retstr
-    
-    def make_a_move(self,choice,fake=0):
+    def get_move_from_state(self,state):
+        return state[4]
+        
+    def make_a_move(self,choice,fake=0,ai=0):
         advchoice = choice.split('-')        
         adventurer1 = None
         adventurer2 = None
@@ -178,18 +192,24 @@ class TransportPuzzle(puzzle.Puzzle):
             self.start_adventurers.append(adventurer1)
             order = 0
         else:
-            print("Illegal move")
+            if ai == 0:
+                print("Illegal move")
             return 0
-        if fake == 0:
+        self.start_adventurers = Adventurer.sort_adventurer_list(self.start_adventurers)
+        self.end_adventurers = Adventurer.sort_adventurer_list(self.end_adventurers)
+        
+        if fake == 0 or ai == 1:
             self.level += 1
-            print("Total moves made: " + str(self.level))
+            if ai == 0:
+                print("Total moves made: " + str(self.level))
         
         time = TransportPuzzle.find_choice_time(adventurer1,adventurer2)
         
         self.update_state(order,time,choice)
+        if fake == 0 or ai == 1:
+            self.possible_states = self.get_all_current_possible_states(self.level,ai)
+            self.update_state_tree(self.state_tree.get_node_of_state(self.state),ai)
         if fake == 0:
-            self.possible_states = self.get_all_current_possible_states(self.level)
-            self.update_state_tree(self.state_tree.get_node_of_state(self.state))
             self.log_move(advchoice,order,time)
         
     def log_move(self,advchoice,order,time):
@@ -224,10 +244,31 @@ class Adventurer:
         return self.get_name() + ": " + str(self.get_walktime())
     
     def sort_adventurer_list(advarr):
-        if len(advarr) >= 1:
+        if len(advarr) <= 1:
             return advarr
-    
-    
-    
-    def merge(righarr,leftarr):
+        left = []
+        right = []
+        for index in range(0,len(advarr)):
+            if index < len(advarr)/2:
+                left.append(advarr[index])
+            else:
+                right.append(advarr[index])
         
+        left = Adventurer.sort_adventurer_list(left)
+        right = Adventurer.sort_adventurer_list(right)
+        
+        return Adventurer.merge(left,right)
+    
+    def merge(leftarr,rightarr):
+        result = []
+        while len(leftarr) > 0 and len(rightarr) > 0:
+            if leftarr[0].get_walktime() <= rightarr[0].get_walktime():
+                result.append(leftarr.pop(0))
+            else:
+                result.append(rightarr.pop(0))
+        
+        while  len(leftarr) > 0:
+            result.append(leftarr.pop(0))
+        while len(rightarr) > 0:
+            result.append(rightarr.pop(0))
+        return result

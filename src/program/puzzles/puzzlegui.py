@@ -121,7 +121,8 @@ class PuzzleGUI:
             print("Won in :" + str(self.activepuzzle.state[3]) + " minutes!")
             self.puzapp.removeButton("Move Selected")
             self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.state[3]) + " minutes!")
-            self.puzapp.setLabelFunction("winLabel",self.stop())
+            self.puzapp.setWarningBox("winLable",self.puzapp.stop())
+            
     
     def space(self):
         print("I'm in space")

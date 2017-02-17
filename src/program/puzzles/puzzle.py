@@ -35,6 +35,8 @@ class Puzzle():
             Puzzle.print_move(log)
             
 class StateTreeNode:
+        
+    
     def __init__(self,state,root=None):
         self.root = root
         self.state = state

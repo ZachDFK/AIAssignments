@@ -158,14 +158,19 @@ class TransportPuzzle(puzzle.Puzzle):
         if state[0] == 0 and state[2] == 1:
             answer = True
         return answer
-    def heuristic(self,type):
+    def heuristic(self,type,node= None ):
         if type == 0:
             # calculates the total minutes that all the adventurers will have to cross, it purposefully undershoots
+            
             return self.get_start_adventurers_total_moves()
         elif type == 1:
-            pass
+            return node.state[0] + node.state[1]/2
         else:
-            pass
+            return (self.get_start_adventurers_total_moves() + (node.state[0] + node.state[1]/2))/2
+            
+    
+    def distance(self,state1,state2):
+        return abs(self.get_cost(state1) - self.get_cost(state2))
     
     def get_start_adventurers_total_moves(self):
         total = 0
@@ -223,7 +228,7 @@ class TransportPuzzle(puzzle.Puzzle):
                 print("Total moves made: " + str(self.level))
         
         time = TransportPuzzle.find_choice_time(adventurer1,adventurer2)
-        
+       
         self.update_state(order,time,choice)
         if fake == 0 or ai == 1:
             self.possible_states = self.get_all_current_possible_states(self.level,ai)

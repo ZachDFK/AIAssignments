@@ -1,6 +1,6 @@
 #AI class
 import copy
-import math
+import sys
 from ..puzzles import transpuzzle,spacepuzzle
 class AI:
 
@@ -97,43 +97,59 @@ class AStarAI():
     def find_list_of_moves(self):
         self.saved_puzzle_move = copy.deepcopy(self.puzzle)
         self.ai_tree = copy.deepcopy(self.puzzle.state_tree)        
-        winningstate = self.AStarSearch(self.puzzle.state)
+        winningstate = self.AStarSearch(self.ai_tree.get_nodes_of_level(0)[0])
         self.puzzle = copy.deepcopy(self.saved_puzzle_move) 
-        return [] 
-    def AStarSearch(self,startState):
-        closedNodes = {}
-        openNodes = [[startState , 0]]
-        cameFrom = [[startState,None]]
         
-        gScore = [[startState,0]]
+        return  AI.move_find_path_of_state(self,winningstate,self.puzzle)
+    def AStarSearch(self,startNode):
+        self.closedNodes = []
+        self.openNodes = [startNode]
+        
+        self.g_score = dict()
+        self.g_score.setdefault("default",["default",sys.maxsize])
+        self.f_score = dict()
+        self.f_score.setdefault("default",["default",sys.maxsize])
+        self.g_score[startNode] = [startNode.state,0]
+        self.f_score[startNode] = [startNode.state,self.puzzle.heuristic(1,startNode)]
         #cameFrom[startState] = None
-        #gScore[startState] = 0
+        #costSoFar[startState] = 0
         
         clean_puzzle = copy.deepcopy(self.puzzle)
-        
-        while len(openNodes) != 0:
-            current = openNodes.pop(0)[0]
-        
+        winning_Node = startNode
+        while len(self.openNodes) != 0:
+            current = self.get_state_with_lowest_f_score()
+            
+            if self.puzzle.is_goal_match(current.state):
+                return current.state            
+            
             self.puzzle = copy.deepcopy(clean_puzzle)                    
-            if self.puzzle.get_move_from_state(current) != "0-0":           
-                temp_moves = AI.move_find_path_of_state(self,current,self.puzzle)
+            if self.puzzle.get_move_from_state(current.state) != "0-0":           
+                temp_moves = AI.move_find_path_of_state(self,current.state,self.puzzle)
                 for move in temp_moves:
                     self.puzzle.make_a_move(move,1,1)
                 for c_node in self.puzzle.state_tree.get_leaf_nodes(self.puzzle.state_tree.get_node_of_state(self.puzzle.state)):
-                    self.ai_tree.add_node(c_node,current)  
-                print(ai_tree)
+                    self.ai_tree.add_node(c_node,self.ai_tree.get_node_of_state(current.state))  
+                #print(self.ai_tree)
                 self.puzzle = copy.deepcopy(clean_puzzle)                        
-            if self.puzzle.is_goal_match(current):
-                break
-            for nextnode in self.ai_tree.get_leaf_nodes(self.ai_tree.get_node_of_state(current)):
-                new_cost = AStarAI.find_value(gScore,current) + self.puzzle.get_cost(nextnode.state)
-                if nextnode.state not in AStarAI.find_all_states(gScore) or new_cost < find_value(gScore,nextnode.state):
-                    gScore.append([nextnode.state, new_cost])
-                    priority = new_cost + self.puzzle.heuristic(0)
-                    openNodes.append([nextnode.state,priority])
-                    cameFrom.append([nextnode.state,current])
-                    
-        return [cameFrom,gScore]
+            
+            
+            self.openNodes.remove(current)
+            self.closedNodes.append(current)
+            for nextnode in self.ai_tree.get_leaf_nodes(self.ai_tree.get_node_of_state(current.state)):
+                
+                if nextnode.state in AStarAI.get_states(self.closedNodes):
+                    continue
+                tentative_g_score = self.g_score[current][1] + self.puzzle.distance(current.state,nextnode.state)
+                if nextnode.state not in AStarAI.get_states(self.openNodes):
+                    self.openNodes.append(nextnode)
+                elif tentative_g_score >= AStarAI.find_g_score_equivalent(nextnode,self.g_score):
+                    continue
+                self.g_score[nextnode] = [nextnode.state,tentative_g_score]
+                self.f_score[nextnode] = [nextnode.state,self.g_score[nextnode][1] + self.puzzle.heuristic(1,current)]
+            
+            AStarAI.print_states_nodes(self.openNodes)
+            AStarAI.print_states_nodes(self.closedNodes)            
+        return "Error"
     
     def find_value(clist,state):
         for index in range(0,len(clist)):
@@ -144,3 +160,28 @@ class AStarAI():
         for item in clist:
             ret.append(item[0])
         return ret
+    def get_state_with_lowest_f_score(self):
+        lowest_score = self.f_score.get("default")[1]
+        result_node = None
+        for node in self.openNodes:
+            potential_cost = self.f_score[node][1]
+            if lowest_score > potential_cost:
+                lowest_score = potential_cost
+                result_node = node
+             
+            
+        return result_node
+    def get_states(Nodes):
+        lis = []
+        for node in Nodes:
+            lis.append(node.state)
+        return lis
+    def find_g_score_equivalent(node,g_score):
+        for key in iter(g_score):
+            if node.state == g_score.get(key)[0]:
+                return g_score.get(key)[1]
+    def print_states_nodes(nodes):
+        strg = ""
+        for node in nodes:
+            strg += str(node.state) + ","
+        print(strg + "\n")

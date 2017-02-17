@@ -24,7 +24,7 @@ class PuzzleGUI:
         if btn == "Move Selected":
             self.activepuzzle.manual_move()
         elif btn == "Run AI Step":
-            sefl.activepuzzle.ai_move(True)
+            self.activepuzzle.ai_move(True)
         else:
             self.activepuzzle.ai_move(False)
         
@@ -68,7 +68,6 @@ class PuzzleGUI:
         else:
             self.puzapp.addLabel("adventurerSelect", text="Choose the number of adventurers(Leave blank for default):", row=0, column=0)
             self.puzapp.addEntry("numAdventurer", row=0, column=2)
-            self.activepuzzle = transpuzzle.TransportPuzzle(self.puzapp.getEntry("numAdventurer"),self.puzapp.getRadioButton("aitype"))            
             self.puzapp.addButton("Show bridge", self.press,row=0,column=3)
             
             
@@ -77,6 +76,7 @@ class PuzzleGUI:
         self.puzapp.stop()
     
     def trans(self):
+        self.activepuzzle = transpuzzle.TransportPuzzle(self.puzapp.getEntry("numAdventurer"),self.puzapp.getRadioButton("aitype"))        
         self.puzapp.addLabel("allAdventurers", text="Available adventurers:", row=3, column=0)
         if self.activepuzzle.state[2] == 0 :
             advarr = self.activepuzzle.start_adventurers
@@ -121,8 +121,8 @@ class PuzzleGUI:
             print("Won in :" + str(self.activepuzzle.state[3]) + " minutes!")
             self.puzapp.removeButton("Move Selected")
             self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.state[3]) + " minutes!")
-            self.puzapp.setWarningBox("winLable",self.puzapp.stop())
-            
+            self.puzapp.setWarningBoxFunction("winLable",self.puzapp.stop())
+            self.activepuzzle.print_log_moves()
     
     def space(self):
         print("I'm in space")

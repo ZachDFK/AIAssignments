@@ -100,13 +100,14 @@ class TransportPuzzle(puzzle.Puzzle):
     def ai_move(self,step):
         if self.listofmoves == []:
             self.listofmoves = self.ai.real_ai.find_list_of_moves()
+            
         while len(self.listofmoves) >0:
-            self.make_a_move(self.logofmoves.pop(0))
+            self.make_a_move(self.listofmoves.pop(0))
             if(step == 1):
                 break
         
         
-    
+        
     def gen_numb_any_start(self,numb):
         adventurers = []
         
@@ -149,12 +150,30 @@ class TransportPuzzle(puzzle.Puzzle):
         self.state[2] = order
         self.state[3] += time
         self.state[4] = choice
-    def is_goal_match(self):
+    def is_goal_match(self,state = None):
+        if state == None:
+            state = self.state
         answer = False
-        if self.state[0] == 0 and self.state[2] == 1:
+        
+        if state[0] == 0 and state[2] == 1:
             answer = True
         return answer
-
+    def heuristic(self,type):
+        if type == 0:
+            # calculates the total minutes that all the adventurers will have to cross, it purposefully undershoots
+            return self.get_start_adventurers_total_moves()
+        elif type == 1:
+            pass
+        else:
+            pass
+    
+    def get_start_adventurers_total_moves(self):
+        total = 0
+        for adv in self.start_adventurers:
+            total =+ adv.get_walktime()
+        return total
+    def get_cost(self,state):
+        return state[3]
     def get_start_string(self):
         return self.get_advent_string("left")
     def get_end_string(self):

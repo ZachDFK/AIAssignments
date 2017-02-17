@@ -30,7 +30,10 @@ class Puzzle():
     
     def get_moves():
         return movestates
-
+    def print_log_moves(self):
+        for log in self.logofmoves:
+            Puzzle.print_move(log)
+            
 class StateTreeNode:
     def __init__(self,state,root=None):
         self.root = root

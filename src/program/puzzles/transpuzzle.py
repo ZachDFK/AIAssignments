@@ -164,9 +164,15 @@ class TransportPuzzle(puzzle.Puzzle):
             
             return self.get_start_adventurers_total_moves()
         elif type == 1:
-            return node.state[0] + node.state[1]/2
+            add =0
+            if len(self.end_adventurers) >0:
+                add = self.end_adventurers[0]
+            return self.get_start_adventurers_total_moves() + add
         else:
-            return (self.get_start_adventurers_total_moves() + (node.state[0] + node.state[1]/2))/2
+            add =0
+            if len(self.end_adventurers) >0:
+                add = self.end_adventurers[0]            
+            return (self.get_start_adventurers_total_moves() +self.get_start_adventurers_total_moves + add)/2
             
     
     def distance(self,state1,state2):

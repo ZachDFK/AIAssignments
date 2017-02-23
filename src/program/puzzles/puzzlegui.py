@@ -54,40 +54,43 @@ class PuzzleGUI:
             self.puzzle = spacepuzzle.SpacePuzzle(option)
     
     def pre_puzzle_set_up(self,type):
+        self.puzapp.startLabelFrame("PuzzleSettings",0,0,0,0,"NWE")
+        self.puzapp.startLabelFrame("AI type:",0,0,0,0,"WE")
         self.puzapp.addRadioButton("aitype", "Breadth First",1,0,1)
         self.puzapp.addRadioButton("aitype","Depth First",1,1,1)
         self.puzapp.addRadioButton("aitype","A*",1,2,1)
-        
+        self.puzapp.stopLabelFrame()
+        self.puzapp.startLabelFrame("Puzzle parameters:",1,0,0,0,"WE")
         if type ==  GuiConstants._GuiConstants__spacepuzname:
-            self.puzapp.addLabel("sizeOfGrid", text="Size of Grid:", 
-                                 row=0, 
-                                 column=0,
-                                 colspan=0,
-                                 rowspan=0)
+            self.puzapp.addLabel("sizeOfGrid","Size of Grid ('X-Y'):",0,0,1)
             self.puzapp.addEntry("x-y",row=0,column=2)
+            self.puzapp.addButton("Initialize Grid",self.press,0,3)
         else:
             self.puzapp.addLabel("adventurerSelect", text="Choose the number of adventurers(Leave blank for default):", row=0, column=0)
-            self.puzapp.addEntry("numAdventurer", row=0, column=2)
-            self.puzapp.addButton("Show bridge", self.press,row=0,column=3)
-            
-            
+            self.puzapp.addEntry("numAdventurer", row=0, column=1)
+            self.puzapp.addButton("Show bridge", self.press,row=0,column=2)
+        self.puzapp.stopLabelFrame()
+        self.puzapp.stopLabelFrame()
     
     def cancel(self):
         self.puzapp.stop()
     
     def trans(self):
+        self.puzapp.disableButton("Show bridge")
+        self.puzapp.startLabelFrame("Puzzle")
+        self.puzapp.startLabelFrame("Adventurers:",0,0,0,0,"EW")
         self.activepuzzle = transpuzzle.TransportPuzzle(self.puzapp.getEntry("numAdventurer"),self.puzapp.getRadioButton("aitype"))        
-        self.puzapp.addLabel("allAdventurers", text="Available adventurers:", row=3, column=0)
+        self.puzapp.addLabel("allAdventurers", text="Available adventurers:", row=0, column=0)
         if self.activepuzzle.state[2] == 0 :
             advarr = self.activepuzzle.start_adventurers
         else:
             advarr = self.activepuzzle.end_adventurers
-    
+       
         for num in range(0,len(advarr)):
-            self.puzapp.addCheckBox(advarr[num].print_adventurer(), row=3,column=num+1,colspan=0)
+            self.puzapp.addCheckBox(advarr[num].print_adventurer(), row=1,column=num,colspan=0)
             self.puzapp.setCheckBoxFunction(advarr[num].print_adventurer(),self.selectedbox)
         
-        
+        self.puzapp.stopLabelFrame()
         self.puzapp.addLabel("leftAdvent", text=self.activepuzzle.get_start_string(), row=5, column=0, colspan=0, 
                             rowspan=0)
         # self.puzapp.addImage("bridge","bridge.gif",1,1)
@@ -104,16 +107,11 @@ class PuzzleGUI:
             inadv  = self.activepuzzle.start_adventurers
 
         for num in range(0,len(inadv)):
-            self.puzapp.removeCheckBox(inadv[num].print_adventurer())
+            self.puzapp.disableCheckBox(inadv[num].print_adventurer())
         
         for num in range(0,len(advarr)):
-            # I know this is a horrable hack of job
-            try:
-                self.puzapp.addCheckBox(advarr[num].print_adventurer(), row=3,column=num+1,colspan=0)
-            except(appJar.appjar.ItemLookupError):
-                print("Error")
-                self.puzapp.setCheckBox(advarr[num].print_adventurer(), ticked=False)
-            self.puzapp.setCheckBoxFunction(advarr[num].print_adventurer(),self.selectedbox)
+            self.puzapp.enableCheckBox(advarr[num].print_adventurer())
+            self.puzapp.setCheckBox(advarr[num].print_adventurer(), ticked=False)
             
         self.puzapp.setLabel("leftAdvent", text=self.activepuzzle.get_start_string())
         self.puzapp.setLabel("rightAdvent", text=self.activepuzzle.get_end_string())
@@ -125,7 +123,7 @@ class PuzzleGUI:
             self.activepuzzle.print_log_moves()
     
     def space(self):
-        print("I'm in space")
-
+        self.puzapp.disableButton("Initialize Grid:")
+        self.activepuzzle = spacepuzzle.SpacePuzzle(self.puzapp.getEntry("x-y"))
 
                                           

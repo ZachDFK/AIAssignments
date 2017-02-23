@@ -1,12 +1,43 @@
 #space puzzle
 from . import puzzle
+import random
 class SpacePuzzle(puzzle.Puzzle):
     
+    def get_row(self):
+        return self.row_len
+    def get_column(self):
+        return self.col_len
     
-    
-    def __init__(self,numb = 0,aitype=0):
-        pass
+    def __init__(self,grid_dimension = '',aitype=0):
+        self.init_grid(grid_dimension)
      
+    
+    def init_grid(self,grid_dimension):
+ 
+        if grid_dimension == '':
+            self.row_len = 3
+            self.col_len = 3
+        else:
+            self.row_len, self.col_len = grid_dimension.split("-")
+            self.row_len = int(self.row_len)
+            self.col_len = int(self.col_len)
+        self.total_num = self.row_len * self.col_len
+        self.number_array = []
+        self.grid = []
+        
+        
+        for num in range(0,self.total_num):
+            self.number_array.append(num)
+        for x in range(self.row_len):
+            temp_row = []
+            for y in range(self.col_len):
+                temp_row.append(self.get_random_value())
+            self.grid.append(temp_row)
+        
+                
+    def get_random_value(self):
+        max_value = len(self.number_array) -1 
+        return self.number_array.pop(random.randint(0, max_value))
         
     def init_ai(self,aitype):
         pass
@@ -16,6 +47,7 @@ class SpacePuzzle(puzzle.Puzzle):
         pass
     def update_state_tree(self,root,ai = 0):
         pass    
+    
     
     def get_moves(self,order):
         pass

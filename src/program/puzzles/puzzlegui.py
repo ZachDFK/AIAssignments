@@ -123,7 +123,19 @@ class PuzzleGUI:
             self.activepuzzle.print_log_moves()
     
     def space(self):
-        self.puzapp.disableButton("Initialize Grid:")
-        self.activepuzzle = spacepuzzle.SpacePuzzle(self.puzapp.getEntry("x-y"))
-
-                                          
+        self.puzapp.disableButton("Initialize Grid")
+        self.activepuzzle = spacepuzzle.SpacePuzzle(self.puzapp.getEntry("x-y"),self.puzapp.getRadioButton("aitype"))
+        
+        self.puzapp.startLabelFrame("Puzzle",2,0,0,0,"EW")
+        self.puzapp.setSticky("news")        
+        self.puzapp.startLabelFrame("Grid",0,0,0,0,"NEWS")
+        for x in range(0,self.activepuzzle.get_row()):
+            for y in range(0,self.activepuzzle.get_column()):
+                self.puzapp.setSticky("news")
+                self.puzapp.setPadding([10,10])
+                self.puzapp.setInPadding([10,10])                
+                self.puzapp.addLabel(str(x)+ "-" + str(y),str(self.activepuzzle.grid[x][y]),row=x,column=y)
+                self.puzapp.setLabelBg(str(x)+ "-" + str(y),"white")
+               
+        self.puzapp.stopLabelFrame()
+        self.puzapp.stopLabelFrame()

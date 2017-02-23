@@ -22,7 +22,7 @@ class AI:
     def move_find_path_of_state(sai,state,puzzle):
         listofmoves = []
         
-        while puzzle.get_move_from_state(state) != "0-0":
+        while puzzle.get_move_from_state(state) != "default":
             listofmoves.insert(0,puzzle.get_move_from_state(state))
             state = sai.ai_tree.get_node_of_state(state).root.state
         return listofmoves

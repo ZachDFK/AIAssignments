@@ -11,7 +11,7 @@ class TransportPuzzle(puzzle.Puzzle):
     
     
     
-    def __init__(self,numb = 0,aitype=0):
+    def __init__(self,numb = '',aitype=0):
         
         self.start_adventurers = self.generate_start_adventurers(numb) 
         self.end_adventurers = self.generate_end_adventurers()
@@ -24,7 +24,7 @@ class TransportPuzzle(puzzle.Puzzle):
     def init_state(self):
         self.level = 0
         self.selectedmoves = []
-        self.state = [len(self.start_adventurers),len(self.end_adventurers),0,0,"0-0"]
+        self.state = [len(self.start_adventurers),len(self.end_adventurers),0,0,"default"]
         print(self.state)
         self.init_state_tree()
     def init_state_tree(self):

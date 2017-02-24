@@ -10,7 +10,7 @@ class SpacePuzzle(puzzle.Puzzle):
     
     def __init__(self,grid_dimension = '',aitype=0):
         self.init_grid(grid_dimension)
-     
+        #self.init_state()
     
     def init_grid(self,grid_dimension):
  
@@ -34,7 +34,21 @@ class SpacePuzzle(puzzle.Puzzle):
                 temp_row.append(self.get_random_value())
             self.grid.append(temp_row)
         
-                
+        self.init_win_grid()
+        
+    def init_win_grid(self):
+        self.win_grid = []
+        for num in range(0,self.total_num):
+            self.number_array.append(num)
+        for x in range(0,self.row_len):
+            temp_row = []
+            for y in range(self.col_len):
+                if x+1 == self.row_len and y+1 == self.col_len :
+                    temp_row.append(self.number_array.pop(0))
+                else:
+                    temp_row.append(self.number_array.pop(1))
+            self.win_grid.append(temp_row)
+        print(self.win_grid) 
     def get_random_value(self):
         max_value = len(self.number_array) -1 
         return self.number_array.pop(random.randint(0, max_value))
@@ -42,30 +56,87 @@ class SpacePuzzle(puzzle.Puzzle):
     def init_ai(self,aitype):
         pass
     def init_state(self):
-        pass
+        self.state = []
+        self.state[0] = self.check_out_of_place_values()
+        self.state[1] = "default"
+        self.state[2] = 0
+    def check_out_of_place_values(self):
+        outofplace = 0
+        for x in range(0,self.row_len):
+            for y in range(0,self.col_len):
+                if self.grid[x][y] != self.win_grid[x][y]:
+                    outofplace += 1
+        return outofplace
     def init_state_tree(self):
-        pass
+        self.possible_states = self.get_all_current_possible_states(self.level) # for the initial sate, all the possible states are at level 1
+        self.state_tree = puzzle.StateTree(copy.deepcopy(self.state))
+        self.update_state_tree(self.state_tree.baseroot)
     def update_state_tree(self,root,ai = 0):
-        pass    
+        for state in self.possible_states:
+            self.state_tree.add_node(puzzle.StateTreeNode(state),root)
+        if ai == 0:
+            print(self.state_tree)
     
     
-    def get_moves(self,order):
-        pass
+    def get_moves(self):
+        blank_cord = self.find_blank_spot()
+        possible_moves = []
+        if blank_cord[0] == 0:
+            top,bot = [0,1]
+        elif blank_cord[0] == self.row_len - 1:
+            top,bot = [-1,0]
+        else:
+            top,bot = [-1,1]
+            
+        if blank_cord[1] == 0:
+            left,right = [0,1]
+        elif blank_cord[1] == self.col_len -1:
+            left,right = [-1,0]
+        else:
+            left,right = [-1,1]
+        
+        cardinal = [top,bot,left,right]
+        for index in range(0,len(cardinal)):
+            top_bot = index - 2
+            if top_bot < 0:
+                temp = blank_cord[0] + cardinal[index]
+                mod = 0
+            else:
+                temp = blank_cord[1] + cardinal[index]
+                mod = 1
+            if temp != blank_cord[mod]:
+                if mod == 0:
+                    move_str = str(temp) + "-" + str(blank_cord[1])
+                else:
+                    move_str = str(blank_cord[0]) + "-" + str(temp)
+                possible_moves.append(move_str)
+        return possible_moves
+    
+    def find_blank_spot(self):
+        for x in range(0,self.row_len):
+            for y in range(0,self.col_len):
+                if self.grid[x][y] == 0:
+                    return [x,y]
+        return "Error"
     def get_all_current_possible_states(self,level,ai=0):
-        pass
-    def generate_start_adventurers(self,numb):
-        pass
+    
+        current_puzz = copy.deepcopy(self)
+        
+        possible_states = []
+        possible_moves = self.get_moves()
+        for move in possible_moves:
+            self = copy.deepcopy(current_puzz)            
+            self.make_a_move(move,1)
+            possible_states.append(self.state)
+        self = copy.deepcopy(current_puzz)
+        if ai == 0:
+            print("Current state:" + str(self.state))
+        
+        return possible_states        
+    
     def manual_move(self):
         pass
     def ai_move(self,step):
-        pass
-    def gen_numb_any_start(self,numb):
-        pass
-    def gen_numb_zero_start(self):
-        pass
-    def generate_end_adventurers(self):
-        pass
-    def get_adventurer(self,name,order):
         pass
     def update_state(self,order,time,choice):
         pass
@@ -73,24 +144,33 @@ class SpacePuzzle(puzzle.Puzzle):
         pass
     def heuristic(self,type,node= None ):
         pass
-    
-    def distance(self,state1,state2):
-        pass
-    def get_start_adventurers_total_moves(self):
-        pass
     def get_cost(self,state):
-        pass
-    def get_start_string(self):
-        pass
-    def get_end_string(self):
-        pass
-    def get_advent_string(self,side):
         pass
     def get_move_from_state(self,state):
         pass
     def make_a_move(self,choice,fake=0,ai=0):
+        if choice == "default":
+            print("Error!")
+        cx,cy = choice.split("-")
+        
+        value = self.grid[cx][cy]
+        
+        for x in range(0,self.row_len):
+            for y in range(0,self.col_len):
+                curvalue = self.grid[x][y]
+                if curvalue == 0:
+                    curvalue = value
+                elif curvalue == value:
+                    curvalue = 0
+                self.grid[x][y] = curvalue
+        
+        
+        if fake  == 0:
+            self.log_move(choice)
+        if fake == 0 or ai == 1:
+            self.possible_states = self.get_all_current_possible_states(self.level,ai)
+            self.update_state_tree(self.state_tree.get_node_of_state(self.state),ai)        
+    
+    def log_move(self,choice):
         pass
-    def log_move(self,advchoice,order,time):
-        pass
-    def find_choice_time(adventurer1,adventurer2):
-        pass
+    

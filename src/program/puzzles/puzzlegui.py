@@ -19,8 +19,17 @@ class PuzzleGUI:
                 removedchck = self.activepuzzle.selectedmoves.pop(0)
                 self.puzapp.setCheckBox(removedchck,False)
             self.activepuzzle.selectedmoves.append(chck)
-            
-    def move(self,btn):
+    
+    
+    def move_space(self,btn):
+        if btn == "Run AI Step":
+            pass
+        elif btn == "Run AI Full":
+            pass
+        else:
+            self.activepuzzle.make_a_move(btn)
+                
+    def move_trans(self,btn):
         if btn == "Move Selected":
             self.activepuzzle.manual_move()
         elif btn == "Run AI Step":
@@ -93,10 +102,11 @@ class PuzzleGUI:
         self.puzapp.stopLabelFrame()
         self.puzapp.addLabel("leftAdvent", text=self.activepuzzle.get_start_string(), row=5, column=0, colspan=0, 
                             rowspan=0)
+                            
         # self.puzapp.addImage("bridge","bridge.gif",1,1)
         self.puzapp.addLabel("bridge", text=">======<", row=5, column=1,colspan=0)
         self.puzapp.addLabel("rightAdvent", text=self.activepuzzle.get_end_string(), row=5, column=2,colspan=0)
-        self.puzapp.addButtons(["Move Selected","Run AI Step","Run AI Full"], self.move, row=6)
+        self.puzapp.addButtons(["Move Selected","Run AI Step","Run AI Full"], self.move_trans(btn), row=6)
         
     def update_bridge(self):
         if self.activepuzzle.state[2] == 0 :
@@ -131,11 +141,32 @@ class PuzzleGUI:
         self.puzapp.startLabelFrame("Grid",0,0,0,0,"NEWS")
         for x in range(0,self.activepuzzle.get_row()):
             for y in range(0,self.activepuzzle.get_column()):
+                titleStr = str(x)+ "-" + str(y)
                 self.puzapp.setSticky("news")
                 self.puzapp.setPadding([10,10])
-                self.puzapp.setInPadding([10,10])                
-                self.puzapp.addLabel(str(x)+ "-" + str(y),str(self.activepuzzle.grid[x][y]),row=x,column=y)
-                self.puzapp.setLabelBg(str(x)+ "-" + str(y),"white")
-               
+                self.puzapp.setInPadding([10,10])
+                if self.activepuzzle.grid[x][y] == 0:
+                    text = ""
+                else:
+                    text = self.activepuzzle.grid[x][y]
+                self.puzapp.addLabel(titleStr,str(text),row=x,column=y)
+                self.puzapp.setLabelBg(titleStr,"white")
+                self.puzapp.setLabelFunction(titleStr,self.move_space)
         self.puzapp.stopLabelFrame()
+        
+        self.puzapp.addButtons(["Run AI Step","Run AI Full"],self.move_space)
+        
         self.puzapp.stopLabelFrame()
+        
+    def update_grid(self):
+        
+        for x in range(0,self.activepuzzle.get_row()):
+            for y in range(0,self.activepuzzle.get_column()):
+                titleStr = str(x)+ "-" + str(y)
+                
+                if self.activepuzzle.grid[x][y] == 0:
+                    text = ""
+                else:
+                    text = self.activepuzzle.grid[x][y]
+                self.puzapp.setLabel(titleStr,str(text),row=x,column=y)     
+    

@@ -170,4 +170,8 @@ class PuzzleGUI:
                 else:
                     text = self.activepuzzle.grid[x][y]
                 self.puzapp.setLabel(titleStr,str(text))     
-    
+        if self.activepuzzle.is_goal_match():
+            print("Won in :" + str(self.activepuzzle.state[2]) + " steps!")
+            self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.state[2]) + " minutes!")
+            self.puzapp.setWarningBoxFunction("winLable",self.puzapp.stop())
+            self.activepuzzle.print_log_moves()

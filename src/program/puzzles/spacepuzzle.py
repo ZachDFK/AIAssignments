@@ -75,8 +75,8 @@ class SpacePuzzle(puzzle.Puzzle):
     def update_state_tree(self,root,ai = 0):
         for state in self.possible_states:
             self.state_tree.add_node(puzzle.StateTreeNode(state),root)
-        if ai == 0:
-            print(self.state_tree)
+        #if ai == 0:
+            #print(self.state_tree)
     
     
     def get_moves(self):
@@ -136,7 +136,11 @@ class SpacePuzzle(puzzle.Puzzle):
         return possible_states        
     
     def manual_move(self,choice):
-        self.make_a_move(choice)
+        
+        if choice in self.get_moves():
+            self.make_a_move(choice)
+        else:
+            print("Move unavailable")
     def ai_move(self,step):
         pass
     def update_state(self,choice):
@@ -144,6 +148,8 @@ class SpacePuzzle(puzzle.Puzzle):
         self.state[1] = choice
         self.state[2] = self.number_of_moves
     def is_goal_match(self,state = None):
+        if state == None:
+            state = self.state
         return state[0] == 0
     def heuristic(self,type,node= None ):
         pass

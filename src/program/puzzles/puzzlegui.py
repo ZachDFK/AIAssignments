@@ -27,8 +27,9 @@ class PuzzleGUI:
         elif btn == "Run AI Full":
             pass
         else:
-            self.activepuzzle.make_a_move(btn)
-                
+            self.activepuzzle.manual_move(btn)
+        
+        self.update_grid()
     def move_trans(self,btn):
         if btn == "Move Selected":
             self.activepuzzle.manual_move()
@@ -168,5 +169,5 @@ class PuzzleGUI:
                     text = ""
                 else:
                     text = self.activepuzzle.grid[x][y]
-                self.puzapp.setLabel(titleStr,str(text),row=x,column=y)     
+                self.puzapp.setLabel(titleStr,str(text))     
     

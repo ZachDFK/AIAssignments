@@ -48,7 +48,7 @@ class StateTreeNode:
         return self.root
     
     def get_height(self,height=0):
-        if(self.root == None):
+        if(self.root == None or self.root == 0):
             return height
         else:
             height +=1

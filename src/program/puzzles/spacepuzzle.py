@@ -1,6 +1,7 @@
 #space puzzle
 from . import puzzle
 import random
+import copy
 class SpacePuzzle(puzzle.Puzzle):
     
     def get_row(self):
@@ -10,7 +11,8 @@ class SpacePuzzle(puzzle.Puzzle):
     
     def __init__(self,grid_dimension = '',aitype=0):
         self.init_grid(grid_dimension)
-        #self.init_state()
+        self.number_of_moves = 0        
+        self.init_state()
     
     def init_grid(self,grid_dimension):
  
@@ -56,10 +58,8 @@ class SpacePuzzle(puzzle.Puzzle):
     def init_ai(self,aitype):
         pass
     def init_state(self):
-        self.state = []
-        self.state[0] = self.check_out_of_place_values()
-        self.state[1] = "default"
-        self.state[2] = 0
+        self.state = [self.check_out_of_place_values(),"default",0]
+        self.init_state_tree()        
     def check_out_of_place_values(self):
         outofplace = 0
         for x in range(0,self.row_len):
@@ -68,9 +68,10 @@ class SpacePuzzle(puzzle.Puzzle):
                     outofplace += 1
         return outofplace
     def init_state_tree(self):
-        self.possible_states = self.get_all_current_possible_states(self.level) # for the initial sate, all the possible states are at level 1
+        self.possible_states = self.get_all_current_possible_states() # for the initial sate, all the possible states are at level 1
         self.state_tree = puzzle.StateTree(copy.deepcopy(self.state))
         self.update_state_tree(self.state_tree.baseroot)
+  
     def update_state_tree(self,root,ai = 0):
         for state in self.possible_states:
             self.state_tree.add_node(puzzle.StateTreeNode(state),root)
@@ -118,7 +119,7 @@ class SpacePuzzle(puzzle.Puzzle):
                 if self.grid[x][y] == 0:
                     return [x,y]
         return "Error"
-    def get_all_current_possible_states(self,level,ai=0):
+    def get_all_current_possible_states(self,ai=0):
     
         current_puzz = copy.deepcopy(self)
         
@@ -134,14 +135,16 @@ class SpacePuzzle(puzzle.Puzzle):
         
         return possible_states        
     
-    def manual_move(self):
-        pass
+    def manual_move(self,choice):
+        self.make_a_move(choice)
     def ai_move(self,step):
         pass
-    def update_state(self,order,time,choice):
-        pass
+    def update_state(self,choice):
+        self.state[0] = self.check_out_of_place_values()
+        self.state[1] = choice
+        self.state[2] = self.number_of_moves
     def is_goal_match(self,state = None):
-        pass
+        return state[0] == 0
     def heuristic(self,type,node= None ):
         pass
     def get_cost(self,state):
@@ -152,7 +155,8 @@ class SpacePuzzle(puzzle.Puzzle):
         if choice == "default":
             print("Error!")
         cx,cy = choice.split("-")
-        
+        cx =int(cx)
+        cy = int(cy)
         value = self.grid[cx][cy]
         
         for x in range(0,self.row_len):
@@ -163,14 +167,17 @@ class SpacePuzzle(puzzle.Puzzle):
                 elif curvalue == value:
                     curvalue = 0
                 self.grid[x][y] = curvalue
-        
-        
+            
+        self.number_of_moves += 1       
         if fake  == 0:
             self.log_move(choice)
+        self.update_state(choice)
         if fake == 0 or ai == 1:
-            self.possible_states = self.get_all_current_possible_states(self.level,ai)
-            self.update_state_tree(self.state_tree.get_node_of_state(self.state),ai)        
+            self.possible_states = self.get_all_current_possible_states(ai)
+            self.update_state_tree(self.state_tree.get_node_of_state(self.state),ai)
     
     def log_move(self,choice):
-        pass
+        lstr = "Made a move at cordinate: "  + choice
+        self.logofmoves.append(lstr)
+        print(lstr)
     

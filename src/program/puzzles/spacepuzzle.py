@@ -16,8 +16,6 @@ class SpacePuzzle(puzzle.Puzzle):
         self.init_state()
         self.init_ai(aitype)
     def init_grid(self,grid_dimension):
-       
-        
         if grid_dimension == '':
             self.row_len = 3
             self.col_len = 3
@@ -28,7 +26,7 @@ class SpacePuzzle(puzzle.Puzzle):
         self.total_num = self.row_len * self.col_len
         self.number_array = []
         self.init_win_grid()
-        self.state= [0,"init",0,[0]]
+        self.state= [0,"init",[0]]
         self.grid = copy.deepcopy(self.win_grid)
         for num in range(0,self.total_num * self.total_num):
             pos_moves = self.get_moves()
@@ -60,7 +58,7 @@ class SpacePuzzle(puzzle.Puzzle):
         self.listofmoves = []        
         
     def init_state(self):
-        self.state = [self.check_out_of_place_values(),"default",0,[0]]
+        self.state = [self.check_out_of_place_values(),"default",[0]]
         self.init_state_tree()        
     def check_out_of_place_values(self):
         outofplace = 0
@@ -154,16 +152,13 @@ class SpacePuzzle(puzzle.Puzzle):
     def update_state(self,choice):
         self.state[0] = self.check_out_of_place_values()
         self.state[1] = choice
-        self.state[2] = self.number_of_moves
-        self.state[3] = self.grid
+        self.state[2] = self.grid
     def is_goal_match(self,state = None):
         if state == None:
             state = self.state
         return state[0] == 0
     def heuristic(self,type,node= None ):
         if type == 0:
-            # calculates the total minutes that all the adventurers will have to cross, it purposefully undershoots
-            
             return self.get_cost(node.state)
         elif type == 1:
             
@@ -171,11 +166,14 @@ class SpacePuzzle(puzzle.Puzzle):
         else:
             add =0            
             return (self.get_cost(node.state) + self.get_manhattan())/2
-         
-    def get_cost(self,state):
+    
+    def get_cost(self,state= None):
         if state == None:
             state = self.state
-        return state[2] 
+        return state[0]
+    
+    def get_final_cost(self,state= None):
+        return self.number_of_moves
     def get_move_from_state(self,state):
         if state == None:
             state = self.state
@@ -210,12 +208,13 @@ class SpacePuzzle(puzzle.Puzzle):
         self.logofmoves.append(lstr)
         print(lstr)
     def distance(self,state1,state2):
-        return abs(self.get_cost(state1) - self.get_cost(state2))
+        
+        return 1
     
     def get_board(self,state=None):
         if state == None:
             state = self.state
-        return state[3]        
+        return state[2]        
     def get_manhattan(self):
         location_of_zero = []
         location_of_one = []

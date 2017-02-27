@@ -127,9 +127,9 @@ class PuzzleGUI:
         self.puzapp.setLabel("leftAdvent", text=self.activepuzzle.get_start_string())
         self.puzapp.setLabel("rightAdvent", text=self.activepuzzle.get_end_string())
         if self.activepuzzle.is_goal_match():
-            print("Won in :" + str(self.activepuzzle.state[3]) + " minutes!")
+            print("Won in :" + str(self.activepuzzle.get_final_cost()) + " minutes!")
             self.puzapp.removeButton("Move Selected")
-            self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.state[3]) + " minutes!")
+            self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.get_final_cost()) + " minutes!")
             self.puzapp.setWarningBoxFunction("winLable",self.puzapp.stop())
             self.activepuzzle.print_log_moves()
     
@@ -171,7 +171,7 @@ class PuzzleGUI:
                     text = self.activepuzzle.grid[x][y]
                 self.puzapp.setLabel(titleStr,str(text))     
         if self.activepuzzle.is_goal_match():
-            print("Won in :" + str(self.activepuzzle.state[2]) + " steps!")
-            self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.state[2]) + " steps!")
+            print("Won in :" + str(self.activepuzzle.get_final_cost()) + " steps!")
+            self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.get_final_cost()) + " steps!")
             self.puzapp.setWarningBoxFunction("winLable",self.puzapp.stop())
             self.activepuzzle.print_log_moves()

@@ -15,6 +15,7 @@ class TransportPuzzle(puzzle.Puzzle):
         
         self.start_adventurers = self.generate_start_adventurers(numb) 
         self.end_adventurers = self.generate_end_adventurers()
+        self.total_time = 0
         self.init_state()
         self.init_ai(aitype)
         
@@ -24,7 +25,7 @@ class TransportPuzzle(puzzle.Puzzle):
     def init_state(self):
         self.level = 0
         self.selectedmoves = []
-        self.state = [len(self.start_adventurers),len(self.end_adventurers),0,0,"default",[0]]
+        self.state = [len(self.start_adventurers),len(self.end_adventurers),0,"default",[0]]
         print(self.state)
         self.init_state_tree()
     def init_state_tree(self):
@@ -144,13 +145,12 @@ class TransportPuzzle(puzzle.Puzzle):
             if modified_array[index].get_name() == name:
                 return modified_array[index]
         return Adventurer("Error",0)    
-    def update_state(self,order,time,choice):
+    def update_state(self,order,choice):
         self.state[0] = len(self.start_adventurers)
         self.state[1] = len(self.end_adventurers)
         self.state[2] = order
-        self.state[3] += time
-        self.state[4] = choice
-        self.state[5] = self.map_board()
+        self.state[3] = choice
+        self.state[4] = self.map_board()
         
     def is_goal_match(self,state = None):
         if state == None:
@@ -185,8 +185,23 @@ class TransportPuzzle(puzzle.Puzzle):
         for adv in self.start_adventurers:
             total =+ adv.get_walktime()
         return total
-    def get_cost(self,state):
-        return state[3]
+    def get_cost(self,state=None):
+        if self.get_move_from_state(state) == "default":
+            return 0
+        advchoice = self.get_move_from_state(state).split("-")
+        adventurer1 = None
+        adventurer2 = None
+        if len(advchoice) > 1:
+            adventurer1 = self.get_adventurer(advchoice[0],0)
+            adventurer2 = self.get_adventurer(advchoice[1],0)             
+        else:
+            adventurer1 = self.get_adventurer(advchoice[0],1)
+            
+        return TransportPuzzle.find_choice_time(adventurer1,adventurer2)
+    
+    def get_final_cost(self):
+        return self.total_time
+    
     def get_start_string(self):
         return self.get_advent_string("left")
     def get_end_string(self):
@@ -203,7 +218,7 @@ class TransportPuzzle(puzzle.Puzzle):
         retstr += "]"
         return retstr
     def get_move_from_state(self,state):
-        return state[4]
+        return state[3]
         
     def make_a_move(self,choice,fake=0,ai=0):
         advchoice = choice.split('-')        
@@ -218,7 +233,7 @@ class TransportPuzzle(puzzle.Puzzle):
             self.end_adventurers.append(adventurer1)
             self.end_adventurers.append(adventurer2)    
             order = 1       
-        elif order ==1 and len(advchoice) == 1:
+        elif order == 1 and len(advchoice) == 1:
             adventurer1 = self.get_adventurer(advchoice[0],order)      
             self.end_adventurers.remove(adventurer1)
             self.start_adventurers.append(adventurer1)
@@ -236,8 +251,8 @@ class TransportPuzzle(puzzle.Puzzle):
                 print("Total moves made: " + str(self.level))
         
         time = TransportPuzzle.find_choice_time(adventurer1,adventurer2)
-       
-        self.update_state(order,time,choice)
+        self.total_time += time
+        self.update_state(order,choice)
         if fake == 0 or ai == 1:
             self.possible_states = self.get_all_current_possible_states(self.level,ai)
             self.update_state_tree(self.state_tree.get_node_of_state(self.state),ai)

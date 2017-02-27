@@ -113,14 +113,12 @@ class AStarAI():
         self.f_score.setdefault("default",["default",sys.maxsize])
         self.g_score[startNode] = [startNode.state,0]
         self.f_score[startNode] = [startNode.state,self.heur]
-        #cameFrom[startState] = None
-        #costSoFar[startState] = 0
         
         clean_puzzle = copy.deepcopy(self.puzzle)
         winning_Node = startNode
         while len(self.openNodes) != 0:
             current = self.get_state_with_lowest_f_score()
-            
+            print(current.state)
             if self.puzzle.is_goal_match(current.state):
                 return current.state            
             
@@ -128,6 +126,7 @@ class AStarAI():
             if self.puzzle.get_move_from_state(current.state) != "default":           
                 temp_moves = AI.move_find_path_of_state(self,current.state,self.puzzle)
                 for move in temp_moves:
+                    
                     self.puzzle.make_a_move(move,1,1)
                 for c_node in self.puzzle.state_tree.get_leaf_nodes(self.puzzle.state_tree.get_node_of_state(self.puzzle.state)):
                     self.ai_tree.add_node(c_node,self.ai_tree.get_node_of_state(current.state))  
@@ -150,8 +149,8 @@ class AStarAI():
                 self.g_score[nextnode] = [nextnode.state,tentative_g_score]
                 self.f_score[nextnode] = [nextnode.state,self.g_score[nextnode][1] + self.heur]
             
-            AStarAI.print_states_nodes(self.openNodes)
-            AStarAI.print_states_nodes(self.closedNodes)            
+            #AStarAI.print_states_nodes(self.openNodes)
+            #AStarAI.print_states_nodes(self.closedNodes)            
         return "Error"
     
     def find_value(clist,state):

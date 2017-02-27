@@ -232,8 +232,13 @@ class SpacePuzzle(puzzle.Puzzle):
         manhattan_number = 0
         for x in range(0,self.row_len):
             for y in range(0,self.col_len):
-                number_postition.append([self.grid[x][y],x,y])
-        for lst in winner_postition:
-            pass
+                number_position.append([self.grid[x][y],x,y])
+                winner_position.append([self.win_grid[x][y],x,y])
+        for numw in range(0,len(winner_position)):
+            for num in range(0,len(number_position)):
+                if number_position[num][0] == winner_position[numw][0]:
+                    absx = abs(number_position[num][1] - winner_position[numw][1])
+                    absy = abs(number_position[num][2] - winner_position[numw][2])
+                    manhattan_number += absx + absy
+        return manhattan_number
         
-        pass

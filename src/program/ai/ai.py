@@ -106,7 +106,7 @@ class AStarAI():
     def AStarSearch(self,startNode):
         self.closedNodes = []
         self.openNodes = [startNode]
-        self.heur = self.puzzle.heuristic(1,startNode)
+        self.heur = self.puzzle.heuristic(0,startNode)
         self.g_score = dict()
         self.g_score.setdefault("default",["default",sys.maxsize])
         self.f_score = dict()
@@ -131,7 +131,7 @@ class AStarAI():
                     self.puzzle.make_a_move(move,1,1)
                 for c_node in self.puzzle.state_tree.get_leaf_nodes(self.puzzle.state_tree.get_node_of_state(self.puzzle.state)):
                     self.ai_tree.add_node(c_node,self.ai_tree.get_node_of_state(current.state))  
-                self.heur = self.puzzle.heuristic(1,current)
+                self.heur = self.puzzle.heuristic(0,current)
                 #print(self.ai_tree)
                 self.puzzle = copy.deepcopy(clean_puzzle)                        
             

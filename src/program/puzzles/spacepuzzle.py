@@ -58,7 +58,7 @@ class SpacePuzzle(puzzle.Puzzle):
         self.listofmoves = []        
         
     def init_state(self):
-        self.state = [self.check_out_of_place_values(),"default",[0]]
+        self.state = [self.check_out_of_place_values(),"default",self.grid]
         self.init_state_tree()        
     def check_out_of_place_values(self):
         outofplace = 0
@@ -215,17 +215,25 @@ class SpacePuzzle(puzzle.Puzzle):
         if state == None:
             state = self.state
         return state[2]        
+    
+    def proper_node(self,state=None):
+        if state == None:
+            state = self.state
+        return self.get_board(state)
+    def node_compare(self,state,nodes):
+        for node in nodes:
+            if self.get_board(state) ==  self.get_board(node.state):
+                return True
+        return False
+    
     def get_manhattan(self):
-        location_of_zero = []
-        location_of_one = []
+        number_position = []
+        winner_position = []
+        manhattan_number = 0
         for x in range(0,self.row_len):
             for y in range(0,self.col_len):
-                curvalue = self.grid[x][y]
-                if curvalue == 0:
-                    location_of_zero = [x,y]
-                elif curvalue == 1:
-                    location_of_one = [x,y]
-                    
-        manhattan_of_one = abs((location_of_one[0]-0) + abs(location_of_one[1]-0))
-        manhattan_of_zero = abs((location_of_zero[0]-self.row_len) + abs(location_of_zero[1]-self.col_len))
-        return manhattan_of_one + manhattan_of_zero
+                number_postition.append([self.grid[x][y],x,y])
+        for lst in winner_postition:
+            pass
+        
+        pass

@@ -180,6 +180,22 @@ class TransportPuzzle(puzzle.Puzzle):
     def distance(self,state1,state2):
         return abs(self.get_cost(state1) - self.get_cost(state2))
     
+
+    def proper_node(self,state=None):
+        if state == None:
+            state = self.state
+        return [self.get_board(state),self.get_order(state)]
+    
+    def node_compare(self,state,nodes):
+        for node in nodes:
+            if self.get_board(state) ==  self.get_board(node.state) and self.get_order(state) == self.get_order(node.state):
+                return True
+        return False    
+    
+    def get_order(self,state= None):
+        if state == None:
+            state = self.state
+        return state[2]
     def get_start_adventurers_total_moves(self):
         total = 0
         for adv in self.start_adventurers:

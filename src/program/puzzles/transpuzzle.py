@@ -24,7 +24,7 @@ class TransportPuzzle(puzzle.Puzzle):
     def init_state(self):
         self.level = 0
         self.selectedmoves = []
-        self.state = [len(self.start_adventurers),len(self.end_adventurers),0,0,"default"]
+        self.state = [len(self.start_adventurers),len(self.end_adventurers),0,0,"default",[0]]
         print(self.state)
         self.init_state_tree()
     def init_state_tree(self):
@@ -35,8 +35,8 @@ class TransportPuzzle(puzzle.Puzzle):
     def update_state_tree(self,root,ai = 0):
         for state in self.possible_states:
             self.state_tree.add_node(puzzle.StateTreeNode(state),root)
-        if ai == 0:
-            print(self.state_tree)    
+        #if ai == 0:
+            #print(self.state_tree)    
     
     def get_moves(self,order):
         moves =[]
@@ -64,8 +64,8 @@ class TransportPuzzle(puzzle.Puzzle):
             self.make_a_move(move,1)
             possible_states.append(self.state)
         self = copy.deepcopy(current_puzz)
-        if ai == 0:
-            print("Current state:" + str(self.state))
+        #if ai == 0:
+            #print("Current state:" + str(self.state))
         
         return possible_states
     def generate_start_adventurers(self,numb):
@@ -150,6 +150,8 @@ class TransportPuzzle(puzzle.Puzzle):
         self.state[2] = order
         self.state[3] += time
         self.state[4] = choice
+        self.state[5] = self.map_board()
+        
     def is_goal_match(self,state = None):
         if state == None:
             state = self.state
@@ -166,7 +168,7 @@ class TransportPuzzle(puzzle.Puzzle):
         elif type == 1:
             add =0
             if len(self.end_adventurers) >0:
-                add = self.end_adventurers[0]
+                add = self.end_adventurers[0].get_walktime()
             return self.get_start_adventurers_total_moves() + add
         else:
             add =0
@@ -259,7 +261,14 @@ class TransportPuzzle(puzzle.Puzzle):
         if adventurer2 != None:
             time = max(adventurer1.get_walktime(),adventurer2.get_walktime())
         return time
-            
+    
+    def get_board(self,state=None):
+        if state == None:
+            state = self.state
+        return state[5]
+    
+    def map_board(self):
+        return [self.get_start_string(),self.get_end_string()]
 class Adventurer:
     
     def __init__(self,name,walktime):

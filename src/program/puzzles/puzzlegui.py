@@ -23,9 +23,9 @@ class PuzzleGUI:
     
     def move_space(self,btn):
         if btn == "Run AI Step":
-            pass
+            self.activepuzzle.ai_move(True)
         elif btn == "Run AI Full":
-            pass
+            self.activepuzzle.ai_move(False)
         else:
             self.activepuzzle.manual_move(btn)
         
@@ -107,7 +107,7 @@ class PuzzleGUI:
         # self.puzapp.addImage("bridge","bridge.gif",1,1)
         self.puzapp.addLabel("bridge", text=">======<", row=5, column=1,colspan=0)
         self.puzapp.addLabel("rightAdvent", text=self.activepuzzle.get_end_string(), row=5, column=2,colspan=0)
-        self.puzapp.addButtons(["Move Selected","Run AI Step","Run AI Full"], self.move_trans(btn), row=6)
+        self.puzapp.addButtons(["Move Selected","Run AI Step","Run AI Full"], self.move_trans, row=6)
         
     def update_bridge(self):
         if self.activepuzzle.state[2] == 0 :
@@ -172,6 +172,6 @@ class PuzzleGUI:
                 self.puzapp.setLabel(titleStr,str(text))     
         if self.activepuzzle.is_goal_match():
             print("Won in :" + str(self.activepuzzle.state[2]) + " steps!")
-            self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.state[2]) + " minutes!")
+            self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.state[2]) + " steps!")
             self.puzapp.setWarningBoxFunction("winLable",self.puzapp.stop())
             self.activepuzzle.print_log_moves()

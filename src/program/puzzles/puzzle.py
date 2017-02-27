@@ -82,6 +82,8 @@ class StateTree:
         for node in self.nodes:
             if node.state == state:
                 return node
+            
+        print("What?")
         return 0
     def __str__(self):
         tstr = ""

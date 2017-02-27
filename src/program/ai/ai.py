@@ -51,6 +51,7 @@ class BreadthFirstAI():
             
                 self.puzzle = copy.deepcopy(clean_puzzle)                  
                 temp_moves = AI.move_find_path_of_state(self,node.state,self.puzzle)
+                print(temp_moves)
                 for move in temp_moves:
                     self.puzzle.make_a_move(move,1,1)
                 if self.puzzle.is_goal_match():                       
@@ -82,6 +83,7 @@ class DepthFirstAI():
             for node in self.ai_tree.get_nodes_of_level(level):
                 self.puzzle = copy.deepcopy(clean_puzzle)                  
                 temp_moves = AI.move_find_path_of_state(self,node.state,self.puzzle)
+                print(temp_moves)
                 for move in temp_moves:
                     self.puzzle.make_a_move(move,1,1)
                 if self.puzzle.is_goal_match():
@@ -123,13 +125,13 @@ class AStarAI():
                 return current.state            
             
             self.puzzle = copy.deepcopy(clean_puzzle)                    
-            if self.puzzle.get_move_from_state(current.state) != "0-0":           
+            if self.puzzle.get_move_from_state(current.state) != "default":           
                 temp_moves = AI.move_find_path_of_state(self,current.state,self.puzzle)
                 for move in temp_moves:
                     self.puzzle.make_a_move(move,1,1)
                 for c_node in self.puzzle.state_tree.get_leaf_nodes(self.puzzle.state_tree.get_node_of_state(self.puzzle.state)):
                     self.ai_tree.add_node(c_node,self.ai_tree.get_node_of_state(current.state))  
-                self.heur = self.puzzle.heuristic(0,current)
+                self.heur = self.puzzle.heuristic(1,current)
                 #print(self.ai_tree)
                 self.puzzle = copy.deepcopy(clean_puzzle)                        
             
@@ -184,5 +186,5 @@ class AStarAI():
     def print_states_nodes(nodes):
         strg = ""
         for node in nodes:
-            strg += str(node.state) + ","
+            strg += str(node.state) + "\n"
         print(strg + "\n")

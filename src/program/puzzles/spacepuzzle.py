@@ -2,6 +2,7 @@
 from . import puzzle
 import random
 import copy
+from ..ai import ai
 class SpacePuzzle(puzzle.Puzzle):
     
     def get_row(self):
@@ -10,12 +11,13 @@ class SpacePuzzle(puzzle.Puzzle):
         return self.col_len
     
     def __init__(self,grid_dimension = '',aitype=0):
-        self.init_grid(grid_dimension)
-        self.number_of_moves = 0        
+        self.number_of_moves = 0              
+        self.init_grid(grid_dimension)  
         self.init_state()
-    
+        self.init_ai(aitype)
     def init_grid(self,grid_dimension):
- 
+       
+        
         if grid_dimension == '':
             self.row_len = 3
             self.col_len = 3
@@ -25,18 +27,15 @@ class SpacePuzzle(puzzle.Puzzle):
             self.col_len = int(self.col_len)
         self.total_num = self.row_len * self.col_len
         self.number_array = []
-        self.grid = []
-        
-        
-        for num in range(0,self.total_num):
-            self.number_array.append(num)
-        for x in range(self.row_len):
-            temp_row = []
-            for y in range(self.col_len):
-                temp_row.append(self.get_random_value())
-            self.grid.append(temp_row)
-        
         self.init_win_grid()
+        self.state= [0,"init",0,[0]]
+        self.grid = copy.deepcopy(self.win_grid)
+        for num in range(0,self.total_num * self.total_num):
+            pos_moves = self.get_moves()
+            self.make_a_move(pos_moves[random.randint(0,len(pos_moves)-1)],1)
+        
+        self.number_of_moves = 0
+        
         
     def init_win_grid(self):
         self.win_grid = []
@@ -51,14 +50,17 @@ class SpacePuzzle(puzzle.Puzzle):
                     temp_row.append(self.number_array.pop(1))
             self.win_grid.append(temp_row)
         print(self.win_grid) 
+        
     def get_random_value(self):
         max_value = len(self.number_array) -1 
         return self.number_array.pop(random.randint(0, max_value))
         
     def init_ai(self,aitype):
-        pass
+        self.ai = ai.AI(self,aitype)
+        self.listofmoves = []        
+        
     def init_state(self):
-        self.state = [self.check_out_of_place_values(),"default",0]
+        self.state = [self.check_out_of_place_values(),"default",0,[0]]
         self.init_state_tree()        
     def check_out_of_place_values(self):
         outofplace = 0
@@ -142,21 +144,42 @@ class SpacePuzzle(puzzle.Puzzle):
         else:
             print("Move unavailable")
     def ai_move(self,step):
-        pass
+        if self.listofmoves == []:
+            self.listofmoves = self.ai.real_ai.find_list_of_moves()
+            
+        while len(self.listofmoves) >0:
+            self.make_a_move(self.listofmoves.pop(0))
+            if(step == 1):
+                break
     def update_state(self,choice):
         self.state[0] = self.check_out_of_place_values()
         self.state[1] = choice
         self.state[2] = self.number_of_moves
+        self.state[3] = self.grid
     def is_goal_match(self,state = None):
         if state == None:
             state = self.state
         return state[0] == 0
     def heuristic(self,type,node= None ):
-        pass
+        if type == 0:
+            # calculates the total minutes that all the adventurers will have to cross, it purposefully undershoots
+            
+            return self.get_cost(node.state)
+        elif type == 1:
+            
+            return self.get_manhattan()
+        else:
+            add =0            
+            return (self.get_cost(node.state) + self.get_manhattan())/2
+         
     def get_cost(self,state):
-        pass
+        if state == None:
+            state = self.state
+        return state[2] 
     def get_move_from_state(self,state):
-        pass
+        if state == None:
+            state = self.state
+        return state[1]
     def make_a_move(self,choice,fake=0,ai=0):
         if choice == "default":
             print("Error!")
@@ -186,4 +209,24 @@ class SpacePuzzle(puzzle.Puzzle):
         lstr = "Made a move at cordinate: "  + choice
         self.logofmoves.append(lstr)
         print(lstr)
+    def distance(self,state1,state2):
+        return abs(self.get_cost(state1) - self.get_cost(state2))
     
+    def get_board(self,state=None):
+        if state == None:
+            state = self.state
+        return state[3]        
+    def get_manhattan(self):
+        location_of_zero = []
+        location_of_one = []
+        for x in range(0,self.row_len):
+            for y in range(0,self.col_len):
+                curvalue = self.grid[x][y]
+                if curvalue == 0:
+                    location_of_zero = [x,y]
+                elif curvalue == 1:
+                    location_of_one = [x,y]
+                    
+        manhattan_of_one = abs((location_of_one[0]-0) + abs(location_of_one[1]-0))
+        manhattan_of_zero = abs((location_of_zero[0]-self.row_len) + abs(location_of_zero[1]-self.col_len))
+        return manhattan_of_one + manhattan_of_zero

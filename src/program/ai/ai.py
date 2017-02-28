@@ -3,8 +3,6 @@ import copy
 import sys
 from ..puzzles import transpuzzle,spacepuzzle
 class AI:
-
-
     def __init__(self,puzzle,style):
         self.activepuzzle = puzzle
         self.style = style
@@ -19,15 +17,29 @@ class AI:
             real_ai = AStarAI(self.activepuzzle)
         return real_ai
 
-    def move_find_path_of_state(sai,state,puzzle):
+    def move_find_path_of_state(sai,node,puzzle):
         listofmoves = []
-        
-        while puzzle.get_move_from_state(state) != "default":
-            listofmoves.insert(0,puzzle.get_move_from_state(state))
-            state = sai.ai_tree.get_node_of_state(state).root.state
+        while puzzle.get_move_from_state(node.state) != "default":
+            
+            listofmoves.insert(0,puzzle.get_move_from_state(node.state))
+            node = node.root
         return listofmoves
         
+    def backtracker(ai,current,heuristic_type = None):
         
+        ai.puzzle = copy.deepcopy(ai.clean_puzzle)                    
+        if ai.puzzle.get_move_from_state(current.state) != "default":           
+            print("State: " + str(current.state))
+            temp_moves = AI.move_find_path_of_state(ai,current,ai.puzzle)
+            for move in temp_moves:
+                ai.puzzle.make_a_move(move,1,1)
+            for c_node in ai.puzzle.state_tree.get_leaf_nodes(ai.puzzle.state_tree.get_node_of_state(ai.puzzle.state)):
+                ai.ai_tree.add_node(c_node,ai.ai_tree.get_node_of_state(current.state))  
+            if heuristic_type != None:
+                ai.heur = ai.puzzle.heuristic(heuristic_type,current)
+            ai.puzzle = copy.deepcopy(ai.clean_puzzle)           
+
+
 class BreadthFirstAI():
     
     def __init__(self,puzzle):
@@ -36,33 +48,36 @@ class BreadthFirstAI():
         
         self.saved_puzzle_move = copy.deepcopy(self.puzzle)
         self.ai_tree = copy.deepcopy(self.puzzle.state_tree)        
-        winningstate = self.first_in_first_out(0)
+        winningstate = self.first_in_first_out(self.ai_tree.get_nodes_of_level(0)[0])
         self.puzzle = copy.deepcopy(self.saved_puzzle_move)        
+        self.ai_tree = None
+        
         return AI.move_find_path_of_state(self,winningstate,self.puzzle)
         
-    def first_in_first_out(self,level):
-        #print(self.ai_tree)
-        if self.puzzle.is_goal_match():
-            return self.puzzle.state
-        else:
-            clean_puzzle = copy.deepcopy(self.puzzle)
-            level +=1
-            for node in self.ai_tree.get_nodes_of_level(level):
+    def first_in_first_out(self,startNode):
+        self.closedNodes = []
+        self.openNodes = [startNode]
+        
+        self.clean_puzzle = copy.deepcopy(self.puzzle)
+        winning_Node = startNode
+        
+        while len(self.openNodes) != 0:
+            current = self.openNodes.pop(0)
             
-                self.puzzle = copy.deepcopy(clean_puzzle)                  
-                temp_moves = AI.move_find_path_of_state(self,node.state,self.puzzle)
-                print(temp_moves)
-                for move in temp_moves:
-                    self.puzzle.make_a_move(move,1,1)
-                if self.puzzle.is_goal_match():                       
-                    return node.state      
-                
-                for c_node in self.puzzle.state_tree.get_leaf_nodes(self.puzzle.state_tree.get_node_of_state(self.puzzle.state)):
-                    self.ai_tree.add_node(c_node,node)
-                
-                self.puzzle = copy.deepcopy(clean_puzzle)
-                   
-            return self.first_in_first_out(level)
+            if self.puzzle.is_goal_match(current.state):
+                return current            
+            
+            AI.backtracker(self,current)
+            self.closedNodes.append(current)
+            for nextnode in self.ai_tree.get_leaf_nodes(self.ai_tree.get_node_of_state(current.state)):
+                if nextnode.get_height() > self.puzzle.get_max_level():
+                    continue                
+                if self.puzzle.node_compare(nextnode.state,self.closedNodes):
+                    continue
+                if self.puzzle.node_compare(nextnode.state,self.openNodes) == False:
+                    self.openNodes.append(nextnode)
+        return "Error"
+
 class DepthFirstAI():
     
     def __init__(self,puzzle):
@@ -70,29 +85,39 @@ class DepthFirstAI():
     def find_list_of_moves(self):
         self.saved_puzzle_move = copy.deepcopy(self.puzzle)
         self.ai_tree = copy.deepcopy(self.puzzle.state_tree)        
-        winningstate = self.depth_search(0)
+        winningstate = self.last_in_last_out(self.ai_tree.get_nodes_of_level(0)[0])
         self.puzzle = copy.deepcopy(self.saved_puzzle_move)
-    
+        self.ai_tree = None
+        
         return AI.move_find_path_of_state(self,winningstate,self.puzzle)
-    def depth_search(self,level):
-        if self.puzzle.is_goal_match():
-            return self.puzzle.state
-        else:
-            clean_puzzle = copy.deepcopy(self.puzzle)
-            level +=1
-            for node in self.ai_tree.get_nodes_of_level(level):
-                self.puzzle = copy.deepcopy(clean_puzzle)                  
-                temp_moves = AI.move_find_path_of_state(self,node.state,self.puzzle)
-                print(temp_moves)
-                for move in temp_moves:
-                    self.puzzle.make_a_move(move,1,1)
-                if self.puzzle.is_goal_match():
-                    return node.state
-                for c_node in self.puzzle.state_tree.get_leaf_nodes(self.puzzle.state_tree.get_node_of_state(self.puzzle.state)):
-                    self.ai_tree.add_node(c_node,node)
-                
-                self.puzzle = copy.deepcopy(clean_puzzle)
-                return self.depth_search(level)
+    
+    def last_in_last_out(self,startNode): 
+        self.closedNodes = []
+        self.openNodes = [startNode]
+        
+        self.clean_puzzle = copy.deepcopy(self.puzzle)
+        winning_Node = startNode
+        
+        while len(self.openNodes) != 0:
+            current = self.openNodes.pop(0)
+            
+            if self.puzzle.is_goal_match(current.state):
+                return current            
+            AI.backtracker(self,current)
+            
+            self.closedNodes.append(current)
+            temp_nodes = []
+            for nextnode in self.ai_tree.get_leaf_nodes(self.ai_tree.get_node_of_state(current.state)):
+                if nextnode.get_height() > self.puzzle.get_max_level():
+                    continue
+                if self.puzzle.node_compare(nextnode.state,self.closedNodes):
+                    continue
+                if self.puzzle.node_compare(nextnode.state,self.openNodes) == False:
+                    temp_nodes.append(nextnode)
+            
+            merged_nodes = temp_nodes + self.openNodes
+            self.openNodes = merged_nodes
+        return "Error"
 class AStarAI():
     def __init__(self,puzzle):
         self.puzzle = puzzle
@@ -100,13 +125,15 @@ class AStarAI():
         self.saved_puzzle_move = copy.deepcopy(self.puzzle)
         self.ai_tree = copy.deepcopy(self.puzzle.state_tree)        
         winningstate = self.AStarSearch(self.ai_tree.get_nodes_of_level(0)[0])
+        self.ai_tree = None
         self.puzzle = copy.deepcopy(self.saved_puzzle_move) 
         
         return  AI.move_find_path_of_state(self,winningstate,self.puzzle)
     def AStarSearch(self,startNode):
+        heuristic_type = 2
         self.closedNodes = []
         self.openNodes = [startNode]
-        self.heur = self.puzzle.heuristic(1,startNode)
+        self.heur = self.puzzle.heuristic(heuristic_type,startNode)
         self.g_score = dict()
         self.g_score.setdefault("default",["default",sys.maxsize])
         self.f_score = dict()
@@ -114,40 +141,34 @@ class AStarAI():
         self.g_score[startNode] = [startNode.state,0]
         self.f_score[startNode] = [startNode.state,self.heur]
         
-        clean_puzzle = copy.deepcopy(self.puzzle)
+        self.clean_puzzle = copy.deepcopy(self.puzzle)
         winning_Node = startNode
         while len(self.openNodes) != 0:
             current = self.get_state_with_lowest_f_score()
             
             if self.puzzle.is_goal_match(current.state):
-                return current.state            
+                return current            
             
-            self.puzzle = copy.deepcopy(clean_puzzle)                    
-            if self.puzzle.get_move_from_state(current.state) != "default":           
-                temp_moves = AI.move_find_path_of_state(self,current.state,self.puzzle)
-                for move in temp_moves:
-                    
-                    self.puzzle.make_a_move(move,1,1)
-                for c_node in self.puzzle.state_tree.get_leaf_nodes(self.puzzle.state_tree.get_node_of_state(self.puzzle.state)):
-                    self.ai_tree.add_node(c_node,self.ai_tree.get_node_of_state(current.state))  
-                self.heur = self.puzzle.heuristic(1,current)
-                #print(self.ai_tree)
-                self.puzzle = copy.deepcopy(clean_puzzle)                        
+            AI.backtracker(self,current,heuristic_type)
             
-            #print(self.ai_tree)
             self.openNodes.remove(current)
             self.closedNodes.append(current)
             for nextnode in self.ai_tree.get_leaf_nodes(self.ai_tree.get_node_of_state(current.state)):
-                
+                exist = True
                 if self.puzzle.node_compare(nextnode.state,self.closedNodes):
                     continue
                 tentative_g_score = self.g_score[current][1] + self.puzzle.distance(current.state,nextnode.state)
                 if self.puzzle.node_compare(nextnode.state,self.openNodes) == False:
                     self.openNodes.append(nextnode)
+                    exist = False
                 elif tentative_g_score >= self.find_g_score_equivalent(nextnode,self.g_score):
                     continue
-                self.g_score[nextnode] = [nextnode.state,tentative_g_score]
-                self.f_score[nextnode] = [nextnode.state,self.g_score[nextnode][1] + self.heur]
+                if exist:
+                    actualnode = self.find_g_score_node(nextnode,self.g_score)
+                else:
+                    actualnode = nextnode
+                self.g_score[actualnode] = [actualnode.state,tentative_g_score]
+                self.f_score[actualnode] = [actualnode.state,self.g_score[actualnode][1] + self.heur]
             
             #AStarAI.print_states_nodes(self.openNodes)
             #AStarAI.print_states_nodes(self.closedNodes)            
@@ -184,6 +205,11 @@ class AStarAI():
         for key in iter(g_score):
             if self.puzzle.proper_node(node.state) == self.puzzle.proper_node(g_score.get(key)[0]):
                 return g_score.get(key)[1]
+    def find_g_score_node(self,node,g_score):
+        for key in iter(g_score):
+            if self.puzzle.proper_node(node.state) == self.puzzle.proper_node(g_score.get(key)[0]):
+                return key
+            
     def print_states_nodes(nodes):
         strg = ""
         for node in nodes:

@@ -28,7 +28,10 @@ class SpacePuzzle(puzzle.Puzzle):
         self.init_win_grid()
         self.state= [0,"init",[0]]
         self.grid = copy.deepcopy(self.win_grid)
-        for num in range(0,self.total_num * self.total_num):
+        
+        
+        self.max_level = self.total_num*self.total_num
+        for num in range(0,self.max_level):
             pos_moves = self.get_moves()
             self.make_a_move(pos_moves[random.randint(0,len(pos_moves)-1)],1)
         
@@ -158,14 +161,14 @@ class SpacePuzzle(puzzle.Puzzle):
             state = self.state
         return state[0] == 0
     def heuristic(self,type,node= None ):
+        type_0 = self.get_cost(node.state)
+        type_1 = self.get_manhattan()
         if type == 0:
-            return self.get_cost(node.state)
+            return type_0
         elif type == 1:
-            
-            return self.get_manhattan()
+            return type_1
         else:
-            add =0            
-            return (self.get_cost(node.state) + self.get_manhattan())/2
+            return (type_0 + type_1)/2
     
     def get_cost(self,state= None):
         if state == None:
@@ -180,7 +183,7 @@ class SpacePuzzle(puzzle.Puzzle):
         return state[1]
     def make_a_move(self,choice,fake=0,ai=0):
         if choice == "default":
-            print("Error!")
+            print("Illegal Move")
         cx,cy = choice.split("-")
         cx =int(cx)
         cy = int(cy)
@@ -241,4 +244,6 @@ class SpacePuzzle(puzzle.Puzzle):
                     absy = abs(number_position[num][2] - winner_position[numw][2])
                     manhattan_number += absx + absy
         return manhattan_number
-        
+    
+    def get_max_level(self):
+        return self.max_level

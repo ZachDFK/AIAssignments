@@ -16,6 +16,7 @@ class TransportPuzzle(puzzle.Puzzle):
         self.start_adventurers = self.generate_start_adventurers(numb) 
         self.end_adventurers = self.generate_end_adventurers()
         self.total_time = 0
+        
         self.init_state()
         self.init_ai(aitype)
         
@@ -25,7 +26,7 @@ class TransportPuzzle(puzzle.Puzzle):
     def init_state(self):
         self.level = 0
         self.selectedmoves = []
-        self.state = [len(self.start_adventurers),len(self.end_adventurers),0,"default",[0]]
+        self.state = [len(self.start_adventurers),len(self.end_adventurers),0,"default",[self.get_start_string(),self.get_end_string()]]
         print(self.state)
         self.init_state_tree()
     def init_state_tree(self):
@@ -72,13 +73,16 @@ class TransportPuzzle(puzzle.Puzzle):
     def generate_start_adventurers(self,numb):
         
         if numb == '':
+            self.max_level = 9
             adventurers = self.gen_numb_zero_start()
         else:
+            
             try:
                 numb = int(numb)            
             except ValueError:
                 print("Needs a number value please!")
-                
+            
+            self.max_level = numb*2 -3                 
             adventurers = self.gen_numb_any_start(numb)
         
         return adventurers
@@ -161,20 +165,20 @@ class TransportPuzzle(puzzle.Puzzle):
             answer = True
         return answer
     def heuristic(self,type,node= None ):
+        
+        type_0 = self.get_start_adventurers_total_moves()
+        
+        add = 0
+        if len(self.end_adventurers) >0:
+            add = self.end_adventurers[0].get_walktime()
+        type_1= self.get_start_adventurers_total_moves() + add
+        
         if type == 0:
-            # calculates the total minutes that all the adventurers will have to cross, it purposefully undershoots
-            
-            return self.get_start_adventurers_total_moves()
+            return type_0
         elif type == 1:
-            add =0
-            if len(self.end_adventurers) >0:
-                add = self.end_adventurers[0].get_walktime()
-            return self.get_start_adventurers_total_moves() + add
+            return type_1
         else:
-            add =0
-            if len(self.end_adventurers) >0:
-                add = self.end_adventurers[0]            
-            return (self.get_start_adventurers_total_moves() +self.get_start_adventurers_total_moves + add)/2
+            return (type_0 + type_1)/2
             
     
     def distance(self,state1,state2):
@@ -296,10 +300,13 @@ class TransportPuzzle(puzzle.Puzzle):
     def get_board(self,state=None):
         if state == None:
             state = self.state
-        return state[5]
+        return state[4]
     
     def map_board(self):
         return [self.get_start_string(),self.get_end_string()]
+    
+    def get_max_level(self):
+        return self.max_level
 class Adventurer:
     
     def __init__(self,name,walktime):

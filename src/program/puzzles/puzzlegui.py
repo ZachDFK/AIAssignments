@@ -132,7 +132,6 @@ class PuzzleGUI:
             self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.get_final_cost()) + " minutes!")
             self.puzapp.setWarningBoxFunction("winLable",self.puzapp.stop())
             self.activepuzzle.print_log_moves()
-            self.activepuzzle.logofmoves = []
     
     def space(self):
         self.puzapp.disableButton("Initialize Grid")
@@ -176,4 +175,3 @@ class PuzzleGUI:
             self.puzapp.warningBox("winLabel","Won in :" + str(self.activepuzzle.get_final_cost()) + " steps!")
             self.puzapp.setWarningBoxFunction("winLable",self.puzapp.stop())
             self.activepuzzle.print_log_moves()
-            self.activepuzzle.logofmoves = []

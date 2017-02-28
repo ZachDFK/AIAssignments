@@ -30,7 +30,7 @@ class SpacePuzzle(puzzle.Puzzle):
         self.grid = copy.deepcopy(self.win_grid)
         
         
-        self.max_level = self.total_num*self.total_num
+        self.max_level = self.total_num*2
         for num in range(0,self.max_level):
             pos_moves = self.get_moves()
             self.make_a_move(pos_moves[random.randint(0,len(pos_moves)-1)],1)

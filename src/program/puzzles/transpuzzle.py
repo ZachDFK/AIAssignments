@@ -171,7 +171,7 @@ class TransportPuzzle(puzzle.Puzzle):
         add = 0
         if len(self.end_adventurers) >0:
             add = self.end_adventurers[0].get_walktime()
-        type_1= self.get_start_adventurers_total_moves() + add
+        type_1= self.start_adventurers[len(self.start_adventurers)-1].get_walktime() + add
         
         if type == 0:
             return type_0

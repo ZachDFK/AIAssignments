@@ -33,6 +33,7 @@ class Puzzle():
     def print_log_moves(self):
         for log in self.logofmoves:
             Puzzle.print_move(log)
+        self.logofmoves = []
             
 class StateTreeNode:
         
